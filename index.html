@@ -57,10 +57,12 @@
     const dropdownList = document.getElementById('tableDropdown');
     const dataDisplay = document.getElementById('dataDisplay');
 
+    // Toggle dropdown
     dropdownBtn.addEventListener('click', () => {
       dropdownList.classList.toggle('hidden');
     });
 
+    // Populate dropdown with table names and make clickable
     async function loadTables() {
       dropdownList.innerHTML = '';
       for (let table of tables) {
@@ -72,6 +74,7 @@
       }
     }
 
+    // Load data from Supabase table
     async function loadTableData(tableName) {
       dropdownList.classList.add('hidden');
       dataDisplay.innerHTML = `<p class='text-[#9B9C9C]'>Loading ${tableName}...</p>`;
