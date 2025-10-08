@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CourierOps - Integrations</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-white text-[#4B4B4D] font-sans min-h-screen flex">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-[#4B4B4D] text-white flex flex-col">
+    <div class="text-center py-6 border-b border-[#9B9C9C]">
+      <h1 class="text-2xl font-bold text-[#E32119]">CourierOps</h1>
+      <p class="text-sm text-[#9B9C9C]">Automation Suite</p>
+    </div>
+    <nav class="flex-1 p-4">
+      <ul>
+        <li><a href="index.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Dashboard</a></li>
+        <li><a href="reports.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Reports</a></li>
+        <li><a href="employees.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Employees</a></li>
+        <li><a href="departments.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Departments</a></li>
+        <li><a href="roles.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Roles</a></li>
+        <li><a href="auditlogs.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Audit Logs</a></li>
+        <li><a href="integrations.html" class="block py-2 px-3 bg-[#E32119] rounded">Integrations</a></li>
+      </ul>
+    </nav>
+    <footer class="p-4 border-t border-[#9B9C9C] text-center text-xs text-[#9B9C9C]">
+      Built by <span class="text-[#E32119] font-semibold">Mpho Mahlaba</span>
+    </footer>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-8 bg-[#F9F9F9] overflow-y-auto">
+    <h1 class="text-3xl font-bold mb-6 text-[#4B4B4D]">System Integrations</h1>
+
+    <section class="mb-8">
+      <p class="text-[#4B4B4D] leading-relaxed">
+        CourierOps Automation Suite integrates seamlessly with Supabase, APIs, and Power Automate flows to 
+        enable real-time updates between logistics platforms like <strong>FedEx</strong>, 
+        <strong>Seabourne</strong>, and <strong>Parcel Perfect</strong>.
+      </p>
+    </section>
+
+    <!-- Integration Diagram -->
+    <section class="mb-8 bg-white p-6 rounded shadow">
+      <h2 class="text-2xl font-semibold mb-4 text-[#E32119]">Automation Flow</h2>
+      <div class="grid md:grid-cols-4 gap-6 text-center">
+        <div class="p-4 border rounded">
+          <h3 class="font-semibold text-[#4B4B4D]">Client CSV Import</h3>
+          <p class="text-sm text-[#9B9C9C] mt-2">Uploads delivery data directly to Supabase using secure endpoints.</p>
+        </div>
+        <div class="p-4 border rounded">
+          <h3 class="font-semibold text-[#4B4B4D]">API Sync</h3>
+          <p class="text-sm text-[#9B9C9C] mt-2">Power Automate triggers data push to external courier systems.</p>
+        </div>
+        <div class="p-4 border rounded">
+          <h3 class="font-semibold text-[#4B4B4D]">Dashboard Update</h3>
+          <p class="text-sm text-[#9B9C9C] mt-2">Dashboard reflects live parcel statuses and POD uploads.</p>
+        </div>
+        <div class="p-4 border rounded">
+          <h3 class="font-semibold text-[#4B4B4D]">Client Notification</h3>
+          <p class="text-sm text-[#9B9C9C] mt-2">Automated email or SMS alerts are sent with tracking details.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Power Automate Section -->
+    <section class="bg-white p-6 rounded shadow">
+      <h2 class="text-2xl font-semibold mb-4 text-[#E32119]">Power Automate Integration</h2>
+      <p class="text-[#4B4B4D] mb-4">
+        Example flow using <strong>Power Automate</strong> to detect new PODs in Supabase and send notifications:
+      </p>
+
+      <div class="bg-[#0A0A0A] text-white p-4 rounded text-sm font-mono overflow-x-auto">
+<pre>
+Trigger: New Row Added (Supabase - Table: parcels)
+↓
+Condition: form_type = "POD"
+↓
+Action 1: Send HTTP Request (POST) to FedEx API
+↓
+Action 2: Send Email (Outlook / Gmail) → Client with POD link
+↓
+Action 3: Insert Audit Log → Table: audit_logs
+</pre>
+      </div>
+
+      <p class="mt-4 text-[#9B9C9C] text-sm">
+        ⚙️ This workflow automates Proof of Delivery processing, audit logging, and client notifications — 
+        showing full process automation capability.
+      </p>
+    </section>
+  </main>
+</body>
+</html>
