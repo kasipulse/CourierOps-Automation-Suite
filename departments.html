@@ -1,1 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CourierOps - Departments</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-white text-[#4B4B4D] font-sans min-h-screen flex">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-[#4B4B4D] text-white flex flex-col">
+    <div class="text-center py-6 border-b border-[#9B9C9C]">
+      <h1 class="text-2xl font-bold text-[#E32119]">CourierOps</h1>
+      <p class="text-sm text-[#9B9C9C]">Automation Suite</p>
+    </div>
+    <nav class="flex-1 p-4">
+      <ul>
+        <li><a href="index.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Dashboard</a></li>
+        <li><a href="reports.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Reports</a></li>
+        <li><a href="employees.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Employees</a></li>
+        <li><a href="departments.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Departments</a></li>
+      </ul>
+    </nav>
+    <footer class="p-4 border-t border-[#9B9C9C] text-center text-xs text-[#9B9C9C]">
+      Built by <span class="text-[#E32119] font-semibold">Mpho Mahlaba</span>
+    </footer>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-1 p-8 bg-[#F9F9F9]">
+    <h1 class="text-3xl font-bold mb-6 text-[#4B4B4D]">Departments</h1>
+    <div id="deptTable" class="bg-white p-4 rounded shadow text-sm">
+      <p class="text-[#9B9C9C]">Loading department data...</p>
+    </div>
+  </main>
+
+  <script>
+    const supabaseUrl = 'https://mwtaveiqrinwdpjrjacz.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13dGF2ZWlxcmlud2RwanJqYWN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MTkwNzYsImV4cCI6MjA3NTM5NTA3Nn0.2WU8_ukDX41eigfkcV7jwuVj1BSi-1FmFZIfyGiimdI';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    async function loadDepartments() {
+      const { data, error } = await supabase.from('departments').select('*');
+      const container = document.getElementById('deptTable');
+      if (error) {
+        container.innerHTML = `<p class='text-red-500'>Error: ${error.message}</p>`;
+        return;
+      }
+      if (!data || data.length === 0) {
+        container.innerHTML = `<p class='text-[#9B9C9C]'>No departments found.</p>`;
+        return;
+      }
+      let html = "<table class='w-full border-collapse border border-gray-300'>";
+      html += "<thead><tr>";
+      Object.keys(data[0]).forEach(key => html += `<th class='border border-gray-300 px-2 py-1 bg-[#9B9C9C] text-white'>${key}</th>`);
+      html += "</tr></thead><tbody>";
+      data.forEach(row => {
+        html += "<tr>";
+        Object.values(row).forEach(val => html += `<td class='border border-gray-300 px-2 py-1 text-center'>${val ?? ''}</td>`);
+        html += "</tr>";
+      });
+      html += "</tbody></table>";
+      container.innerHTML = html;
+    }
+    document.addEventListener('DOMContentLoaded', loadDepartments);
+  </script>
+</body>
+</html>
 
