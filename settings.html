@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings - CourierOps Automation Suite</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-white text-[#4B4B4D] font-sans min-h-screen flex" id="body">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-[#4B4B4D] text-white flex flex-col">
+    <div class="text-center py-6 border-b border-[#9B9C9C]">
+      <h1 class="text-2xl font-bold text-[#E32119]">CourierOps</h1>
+      <p class="text-sm text-[#9B9C9C]">Automation Suite</p>
+    </div>
+
+    <nav class="flex-1 p-4">
+      <h2 class="text-xs uppercase tracking-wide text-[#9B9C9C] mb-2">Menu</h2>
+      <ul>
+        <li><a href="index.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Dashboard</a></li>
+        <li><a href="reports.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Reports</a></li>
+        <li><a href="employees.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Employees</a></li>
+        <li><a href="settings.html" class="block py-2 px-3 bg-[#E32119] rounded">Settings</a></li>
+      </ul>
+    </nav>
+
+    <footer class="p-4 border-t border-[#9B9C9C] text-center text-xs text-[#9B9C9C]">
+      Built by <span class="text-[#E32119] font-semibold">Mpho Mahlaba</span>
+    </footer>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-8 bg-[#F9F9F9]">
+    <h1 class="text-3xl font-bold mb-6 text-[#4B4B4D]">Settings</h1>
+
+    <!-- Profile Section -->
+    <section class="bg-white p-6 rounded shadow mb-8">
+      <h2 class="text-xl font-semibold mb-4 text-[#4B4B4D]">Profile Settings</h2>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm text-[#9B9C9C] mb-1">Full Name</label>
+          <input type="text" id="userName" class="border rounded w-full p-2" placeholder="Mpho Mahlaba">
+        </div>
+        <div>
+          <label class="block text-sm text-[#9B9C9C] mb-1">Email Address</label>
+          <input type="email" id="userEmail" class="border rounded w-full p-2" placeholder="mpho@pakisalogistics.co.za">
+        </div>
+      </div>
+      <button id="saveProfile" class="mt-4 bg-[#E32119] text-white px-4 py-2 rounded hover:bg-[#c01b13]">Save Profile</button>
+    </section>
+
+    <!-- API Settings -->
+    <section class="bg-white p-6 rounded shadow mb-8">
+      <h2 class="text-xl font-semibold mb-4 text-[#4B4B4D]">API Configuration</h2>
+      <label class="block text-sm text-[#9B9C9C] mb-1">Supabase URL</label>
+      <input type="text" id="apiUrl" class="border rounded w-full p-2 mb-4" placeholder="https://mwtaveiqrinwdpjrjacz.supabase.co">
+
+      <label class="block text-sm text-[#9B9C9C] mb-1">Anon Key</label>
+      <input type="password" id="apiKey" class="border rounded w-full p-2 mb-4" placeholder="Enter your anon key">
+
+      <button id="saveApi" class="bg-[#E32119] text-white px-4 py-2 rounded hover:bg-[#c01b13]">Save API Config</button>
+    </section>
+
+    <!-- Theme Settings -->
+    <section class="bg-white p-6 rounded shadow">
+      <h2 class="text-xl font-semibold mb-4 text-[#4B4B4D]">Theme Preferences</h2>
+      <div class="flex items-center justify-between">
+        <p>Enable Dark Mode</p>
+        <label class="inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="themeToggle" class="sr-only">
+          <div class="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-[#E32119] relative">
+            <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-all peer-checked:translate-x-5"></div>
+          </div>
+        </label>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Load saved preferences
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedName = localStorage.getItem('userName');
+      const savedEmail = localStorage.getItem('userEmail');
+      const savedUrl = localStorage.getItem('apiUrl');
+      const savedKey = localStorage.getItem('apiKey');
+      const darkMode = localStorage.getItem('darkMode') === 'true';
+
+      if (savedName) document.getElementById('userName').value = savedName;
+      if (savedEmail) document.getElementById('userEmail').value = savedEmail;
+      if (savedUrl) document.getElementById('apiUrl').value = savedUrl;
+      if (savedKey) document.getElementById('apiKey').value = savedKey;
+      if (darkMode) {
+        document.getElementById('themeToggle').checked = true;
+        document.body.classList.add('bg-[#2D2D2D]', 'text-white');
+      }
+    });
+
+    // Save Profile
+    document.getElementById('saveProfile').addEventListener('click', () => {
+      localStorage.setItem('userName', document.getElementById('userName').value);
+      localStorage.setItem('userEmail', document.getElementById('userEmail').value);
+      alert('✅ Profile saved successfully!');
+    });
+
+    // Save API Config
+    document.getElementById('saveApi').addEventListener('click', () => {
+      localStorage.setItem('apiUrl', document.getElementById('apiUrl').value);
+      localStorage.setItem('apiKey', document.getElementById('apiKey').value);
+      alert('✅ API configuration saved!');
+    });
+
+    // Theme Toggle
+    document.getElementById('themeToggle').addEventListener('change', (e) => {
+      if (e.target.checked) {
+        document.body.classList.add('bg-[#2D2D2D]', 'text-white');
+        localStorage.setItem('darkMode', true);
+      } else {
+        document.body.classList.remove('bg-[#2D2D2D]', 'text-white');
+        localStorage.setItem('darkMode', false);
+      }
+    });
+  </script>
+</body>
+</html>
