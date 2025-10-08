@@ -7,7 +7,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-
 <body class="bg-white text-[#4B4B4D] font-sans min-h-screen flex">
   <!-- Sidebar -->
   <aside class="w-64 bg-[#4B4B4D] text-white flex flex-col">
@@ -19,49 +18,49 @@
     <nav class="flex-1 p-4">
       <h2 class="text-xs uppercase tracking-wide text-[#9B9C9C] mb-2">Menu</h2>
       <ul>
-        <li><a href="#" class="block py-2 px-3 hover:bg-[#E32119] rounded">Dashboard</a></li>
-        <li><a href="#" class="block py-2 px-3 hover:bg-[#E32119] rounded">Reports</a></li>
+        <li><a href="index.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Dashboard</a></li>
+        <li><a href="reports.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Reports</a></li>
+        <li><a href="employees.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Employees</a></li>
       </ul>
 
       <div class="mt-6">
         <h2 class="text-xs uppercase tracking-wide text-[#9B9C9C] mb-2">Database Tables</h2>
         <div class="relative">
-          <button class="w-full bg-[#E32119] text-white py-2 px-3 rounded hover:bg-[#c01b13]">
+          <button id="dropdownBtn" class="w-full bg-[#E32119] text-white py-2 px-3 rounded hover:bg-[#c01b13]">
             Show Tables ▼
           </button>
-          <ul id="table-dropdown" class="absolute w-full mt-2 bg-white text-[#4B4B4D] rounded shadow-lg hidden z-10"></ul>
+          <ul id="tableDropdown" class="absolute w-full mt-2 bg-white text-[#4B4B4D] rounded shadow-lg hidden z-10"></ul>
         </div>
       </div>
     </nav>
+
+    <footer class="p-4 border-t border-[#9B9C9C] text-center text-xs text-[#9B9C9C]">
+      Built by <span class="text-[#E32119] font-semibold">Mpho Mahlaba</span>
+    </footer>
   </aside>
 
   <!-- Main Content -->
   <main class="flex-1 p-8 bg-[#F9F9F9]">
     <h1 class="text-3xl font-bold mb-6 text-[#4B4B4D]">Dashboard</h1>
-
-    <div id="data-display" class="bg-white p-4 rounded shadow">
+    <div id="dataDisplay" class="bg-white p-4 rounded shadow">
       <p class="text-[#9B9C9C]">Select a table from the sidebar to view data.</p>
     </div>
   </main>
 
   <script>
-    // Supabase connection
     const supabaseUrl = 'https://mwtaveiqrinwdpjrjacz.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13dGF2ZWlxcmlud2RwanJqYWN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MTkwNzYsImV4cCI6MjA3NTM5NTA3Nn0.2WU8_ukDX41eigfkcV7jwuVj1BSi-1FmFZIfyGiimdI';
     const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
     const tables = ['employees', 'departments', 'roles', 'audit_logs'];
+    const dropdownBtn = document.getElementById('dropdownBtn');
+    const dropdownList = document.getElementById('tableDropdown');
+    const dataDisplay = document.getElementById('dataDisplay');
 
-    const dropdownBtn = document.querySelector('.relative button');
-    const dropdownList = document.getElementById('table-dropdown');
-    const dataDisplay = document.getElementById('data-display');
-
-    // Toggle dropdown
     dropdownBtn.addEventListener('click', () => {
       dropdownList.classList.toggle('hidden');
     });
 
-    // Load tables into dropdown
     async function loadTables() {
       dropdownList.innerHTML = '';
       for (let table of tables) {
@@ -73,7 +72,6 @@
       }
     }
 
-    // Load table data when clicked
     async function loadTableData(tableName) {
       dropdownList.classList.add('hidden');
       dataDisplay.innerHTML = `<p class='text-[#9B9C9C]'>Loading ${tableName}...</p>`;
@@ -88,8 +86,7 @@
         return;
       }
 
-      // Create a simple table
-      let html = `<h2 class='text-xl font-semibold mb-3 capitalize'>${tableName.replace('_', ' ')}</h2>`;
+      let html = `<h2 class='text-xl font-semibold mb-3 capitalize'>${tableName}</h2>`;
       html += "<table class='w-full border-collapse border border-gray-300 text-sm'>";
       html += "<thead><tr>";
       for (let key of Object.keys(data[0])) {
