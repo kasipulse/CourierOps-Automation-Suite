@@ -1,19 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Employees - CourierOps</title>
-  <link rel="stylesheet" href="assets/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Employees - CourierOps Automation Suite</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body>
-  <header>
-    <h1>Employees</h1>
-    <a href="index.html">← Back to Dashboard</a>
-  </header>
-  <main>
-    <p>This page will show the employee data, drivers, and their performance summaries.</p>
+<body class="bg-white text-[#4B4B4D] font-sans min-h-screen flex">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-[#4B4B4D] text-white flex flex-col">
+    <div class="text-center py-6 border-b border-[#9B9C9C]">
+      <h1 class="text-2xl font-bold text-[#E32119]">CourierOps</h1>
+      <p class="text-sm text-[#9B9C9C]">Automation Suite</p>
+    </div>
+
+    <nav class="flex-1 p-4">
+      <h2 class="text-xs uppercase tracking-wide text-[#9B9C9C] mb-2">Menu</h2>
+      <ul>
+        <li><a href="index.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Dashboard</a></li>
+        <li><a href="reports.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Reports</a></li>
+        <li><a href="employees.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Employees</a></li>
+      </ul>
+    </nav>
+
+    <footer class="p-4 border-t border-[#9B9C9C] text-center text-xs text-[#9B9C9C]">
+      Built by <span class="text-[#E32119] font-semibold">Mpho Mahlaba</span>
+    </footer>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-8 bg-[#F9F9F9]">
+    <h1 class="text-3xl font-bold mb-6 text-[#4B4B4D]">Employees</h1>
+
+    <div class="mb-4 flex gap-4">
+      <input type="text" id="searchName" placeholder="Search by name or email" class="border rounded p-2 flex-1">
+      <select id="filterDept" class="border rounded p-2">
+        <option value="">All Departments</option>
+      </select>
+    </div>
+
+    <div id="employeeTable" class="bg-white p-4 rounded shadow">
+      <p class="text-[#9B9C9C]">Loading employees...</p>
+    </div>
   </main>
+
+  <script>
+    const supabaseUrl = 'https://mwtaveiqrinwdpjrjacz.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13dGF2ZWlxcmlud2RwanJqYWN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MTkwNzYsImV4cCI6MjA3NTM5NTA3Nn0.2WU8_ukDX41eigfkcV7jwuVj1BSi-1FmFZIfyGiimdI';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    let employeesData = [];
+
+    async function loadEmployees() {
+      const { data, error } = await supabase
+        .from('employees')
+        .select('id, name, email, department_id, departments!inner(name)');
+      if (error) { console.error(error); return; }
+      employeesData = data;
+
+      const deptSelect = document.getElementById('filterDept');
+      const departments = [...new Set(data.map(e => e.departments.name))];
+      departments.forEach(d => {
+        const option = document.createElement('option');
+        option.value = d;
+        option.textContent = d;
+        deptSelect.appendChild(option);
+      });
+
+      renderTable();
+    }
+
+    function renderTable() {
+      const tbody = employeesData
+        .filter(e => !document.getElementById('filterDept').value || e.departments.name === document.getElementById('filterDept').value)
+        .filter(e => e.name.toLowerCase().includes(document.getElementById('searchName').value.toLowerCase()) ||
+                     e.email.toLowerCase().includes(document.getElementById('searchName').value.toLowerCase()));
+
+      const tableDiv = document.getElementById('employeeTable');
+      if (!tbody.length) {
+        tableDiv.innerHTML = '<p class="text-[#9B9C9C]">No employees found.</p>';
+        return;
+      }
+
+      let html = "<table class='w-full border-collapse border border-gray-300 text-sm'>";
+      html += "<thead><tr><th class='border border-gray-300 px-2 py-1 bg-[#9B9C9C] text-white'>Name</th>";
+      html += "<th class='border border-gray-300 px-2 py-1 bg-[#9B9C9C] text-white'>Email</th>";
+      html += "<th class='border border-gray-300 px-2 py-1 bg-[#9B9C9C] text-white'>Department</th></tr></thead><tbody>";
+
+      tbody.forEach(emp => {
+        html += `<tr><td class='border border-gray-300 px-2 py-1'>${emp.name}</td>`;
+        html += `<td class='border border-gray-300 px-2 py-1'>${emp.email}</td>`;
+        html += `<td class='border border-gray-300 px-2 py-1'>${emp.departments.name}</td></tr>`;
+      });
+
+      html += "</tbody></table>";
+      tableDiv.innerHTML = html;
+    }
+
+    document.getElementById('searchName').addEventListener('input', renderTable);
+    document.getElementById('filterDept').addEventListener('change', renderTable);
+
+    loadEmployees();
+  </script>
+
 </body>
 </html>
-
