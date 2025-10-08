@@ -1,296 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>MM Courier Dashboard</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CourierOps Automation Suite</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: white;
-      color: #4B4B4D;
-      padding: 20px;
-    }
-    h1, h2 { color: #E32119; }
-    table { border-collapse: collapse; width: 100%; margin-bottom: 30px; box-shadow:0 0 10px rgba(0,0,0,0.05);}
-    th, td { border:1px solid #9B9C9C; padding:8px; text-align:left;}
-    th { background-color:#4B4B4D; color:white; }
-    tbody tr:nth-child(even){ background-color:#f9f9f9; }
-    section{ margin-bottom:40px; }
-    .filter-container{ margin-bottom:10px; }
-    .status-badge{ color:white; padding:3px 6px; border-radius:4px; font-weight:bold; }
-    .status-approved{ background-color:green; }
-    .status-pending{ background-color:orange; }
-    .status-inprogress{ background-color:red; }
-    .status-error{ background-color:red; }
-    button{ margin-right:5px; padding:4px 8px; border:none; border-radius:4px; cursor:pointer; background-color:#E32119; color:white; }
-    button:hover{ opacity:0.8; }
-    #new-request-modal{ display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); justify-content:center; align-items:center; }
-    #new-request-modal .modal-content{ background:white; padding:20px; border-radius:8px; width:400px; }
-    #new-request-modal input, #new-request-modal select{ width:100%; margin-bottom:10px; padding:6px; }
-  </style>
 </head>
-<body>
-  <h1>MM Courier Dashboard</h1>
-  <input type="hidden" id="current-user" value="demo-user-id">
 
-  <!-- Employees Section -->
-  <section>
-    <h2>Employees</h2>
-    <div class="filter-container">
-      <label>Filter by Department: </label>
-      <select id="department-filter"><option value="">All</option></select>
-      <input type="text" id="employee-search" placeholder="Search name/email">
+<body class="bg-white text-[#4B4B4D] font-sans min-h-screen flex">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-[#4B4B4D] text-white flex flex-col">
+    <div class="text-center py-6 border-b border-[#9B9C9C]">
+      <h1 class="text-2xl font-bold text-[#E32119]">CourierOps</h1>
+      <p class="text-sm text-[#9B9C9C]">Automation Suite</p>
     </div>
-    <table id="employees-table">
-      <thead><tr><th>Name</th><th>Email</th><th>Department</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </section>
 
-  <!-- Departments Section -->
-  <section>
-    <h2>Departments</h2>
-    <table id="departments-table">
-      <thead><tr><th>ID</th><th>Name</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </section>
+    <nav class="flex-1 p-4">
+      <h2 class="text-xs uppercase tracking-wide text-[#9B9C9C] mb-2">Menu</h2>
+      <ul>
+        <li><a href="#" class="block py-2 px-3 hover:bg-[#E32119] rounded">Dashboard</a></li>
+        <li><a href="#" class="block py-2 px-3 hover:bg-[#E32119] rounded">Reports</a></li>
+      </ul>
 
-  <!-- Automation Requests Section -->
-  <section>
-    <h2>Automation Requests <button id="open-new-request">New Request</button></h2>
-    <div class="filter-container">
-      <label>Filter by Status: </label>
-      <select id="status-filter">
-        <option value="">All</option>
-        <option value="In Progress">In Progress</option>
-        <option value="Pending">Pending</option>
-        <option value="Approved">Approved</option>
-      </select>
-      <input type="text" id="request-search" placeholder="Search title">
+      <div class="mt-6">
+        <h2 class="text-xs uppercase tracking-wide text-[#9B9C9C] mb-2">Database Tables</h2>
+        <div class="relative">
+          <button class="w-full bg-[#E32119] text-white py-2 px-3 rounded hover:bg-[#c01b13]">
+            Show Tables ▼
+          </button>
+          <ul id="table-dropdown" class="absolute w-full mt-2 bg-white text-[#4B4B4D] rounded shadow-lg hidden z-10"></ul>
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-8 bg-[#F9F9F9]">
+    <h1 class="text-3xl font-bold mb-6 text-[#4B4B4D]">Dashboard</h1>
+
+    <div id="data-display" class="bg-white p-4 rounded shadow">
+      <p class="text-[#9B9C9C]">Select a table from the sidebar to view data.</p>
     </div>
-    <table id="requests-table">
-      <thead><tr><th>Title</th><th>Created By</th><th>Department</th><th>Status</th><th>Priority</th><th>Actions</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </section>
-
-  <!-- Approvals Section -->
-  <section>
-    <h2>Approvals</h2>
-    <table id="approvals-table">
-      <thead><tr><th>Decision</th><th>Comments</th><th>Request</th><th>Approver</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </section>
-
-  <!-- Audit Logs Section -->
-  <section>
-    <h2>Audit Logs</h2>
-    <table id="auditlogs-table">
-      <thead><tr><th>Action</th><th>Entity</th><th>Details</th><th>User</th><th>Created At</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </section>
-
-  <!-- Analytics Section -->
-  <section>
-    <h2>Dashboard Analytics</h2>
-    <canvas id="requests-dept-chart" width="400" height="200"></canvas>
-    <canvas id="requests-status-chart" width="400" height="200" style="margin-top:30px;"></canvas>
-    <canvas id="requests-priority-chart" width="400" height="200" style="margin-top:30px;"></canvas>
-  </section>
-
-  <!-- New Request Modal -->
-  <div id="new-request-modal">
-    <div class="modal-content">
-      <h3>New/Edit Request</h3>
-      <input type="text" id="new-request-title" placeholder="Title">
-      <select id="new-request-department"></select>
-      <select id="new-request-priority">
-        <option value="High">High</option>
-        <option value="Medium">Medium</option>
-        <option value="Low">Low</option>
-      </select>
-      <select id="new-request-status">
-        <option value="Pending">Pending</option>
-        <option value="In Progress">In Progress</option>
-        <option value="Approved">Approved</option>
-      </select>
-      <button id="save-new-request">Save</button>
-      <button id="close-new-request">Cancel</button>
-    </div>
-  </div>
+  </main>
 
   <script>
-    const SUPABASE_URL = 'https://YOUR_SUPABASE_PROJECT_URL';
-    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Supabase connection
+    const supabaseUrl = 'https://mwtaveiqrinwdpjrjacz.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13dGF2ZWlxcmlud2RwanJqYWN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MTkwNzYsImV4cCI6MjA3NTM5NTA3Nn0.2WU8_ukDX41eigfkcV7jwuVj1BSi-1FmFZIfyGiimdI';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    let employeesData=[], requestsData=[], currentEditId=null;
-    
-    // ============================ Employees
-    async function loadEmployees(){
-      const {data,error} = await supabase.from('employees').select(`name,email,department_id,departments!inner(name)`);
-      if(error){console.error(error); return;}
-      employeesData=data;
+    const tables = ['employees', 'departments', 'roles', 'audit_logs'];
 
-      const deptSelect = document.getElementById('department-filter');
-      const modalDeptSelect=document.getElementById('new-request-department');
-      deptSelect.innerHTML='<option value="">All</option>'; modalDeptSelect.innerHTML='';
-      const departments=[...new Set(data.map(e=>e.departments.name))];
-      departments.forEach(d=>{
-        const option=document.createElement('option'); option.value=d; option.textContent=d; deptSelect.appendChild(option);
-        const option2=document.createElement('option'); option2.value=d; option2.textContent=d; modalDeptSelect.appendChild(option2);
-      });
-      renderEmployees();
-    }
-    function renderEmployees(){
-      const tbody=document.querySelector('#employees-table tbody');
-      const filterValue=document.getElementById('department-filter').value.toLowerCase();
-      const searchValue=document.getElementById('employee-search').value.toLowerCase();
-      tbody.innerHTML='';
-      employeesData.filter(e=>(filterValue===''||e.departments.name.toLowerCase()===filterValue))
-        .filter(e=>e.name.toLowerCase().includes(searchValue)||e.email.toLowerCase().includes(searchValue))
-        .forEach(emp=>{
-          const tr=document.createElement('tr');
-          tr.innerHTML=`<td>${emp.name}</td><td>${emp.email}</td><td>${emp.departments.name}</td>`;
-          tbody.appendChild(tr);
-        });
-    }
-    document.getElementById('department-filter').addEventListener('change',renderEmployees);
-    document.getElementById('employee-search').addEventListener('input',renderEmployees);
+    const dropdownBtn = document.querySelector('.relative button');
+    const dropdownList = document.getElementById('table-dropdown');
+    const dataDisplay = document.getElementById('data-display');
 
-    // ============================ Requests
-    async function loadRequests(){
-      const {data,error}=await supabase.from('automation_requests')
-        .select(`id,title,status,priority,created_by!inner(name),departments!inner(name),department_id`);
-      if(error) return console.error(error);
-      requestsData=data;
-      refreshDashboard();
-    }
+    // Toggle dropdown
+    dropdownBtn.addEventListener('click', () => {
+      dropdownList.classList.toggle('hidden');
+    });
 
-    function renderRequests(){
-      const tbody=document.querySelector('#requests-table tbody');
-      const filterValue=document.getElementById('status-filter').value.toLowerCase();
-      const searchValue=document.getElementById('request-search').value.toLowerCase();
-      tbody.innerHTML='';
-      requestsData.filter(r=>filterValue===''||r.status.toLowerCase()===filterValue)
-        .filter(r=>r.title.toLowerCase().includes(searchValue))
-        .forEach(req=>{
-          const tr=document.createElement('tr');
-          const statusClass=req.status.toLowerCase().replace(' ','');
-          tr.innerHTML=`
-            <td>${req.title}</td>
-            <td>${req.created_by.name}</td>
-            <td>${req.departments.name}</td>
-            <td><span class="status-badge status-${statusClass}">${req.status}</span></td>
-            <td>${req.priority}</td>
-            <td>
-              <button class="edit-request" data-id="${req.id}">Edit</button>
-              <button class="delete-request" data-id="${req.id}">Delete</button>
-              <button class="trigger-integration" data-id="${req.id}">Trigger</button>
-            </td>`;
-          tbody.appendChild(tr);
-        });
-
-      document.querySelectorAll('.edit-request').forEach(b=>b.onclick=()=>openEditRequest(b.dataset.id));
-      document.querySelectorAll('.delete-request').forEach(b=>b.onclick=()=>deleteRequest(b.dataset.id));
-      document.querySelectorAll('.trigger-integration').forEach(b=>b.onclick=()=>triggerIntegration(b.dataset.id));
-    }
-
-    // ============================ Modal
-    const modal=document.getElementById('new-request-modal');
-    document.getElementById('open-new-request').onclick=()=>{currentEditId=null; modal.style.display='flex';};
-    document.getElementById('close-new-request').onclick=()=>modal.style.display='none';
-    async function openEditRequest(id){
-      currentEditId=id;
-      const req=requestsData.find(r=>r.id===id);
-      document.getElementById('new-request-title').value=req.title;
-      document.getElementById('new-request-department').value=req.department_id;
-      document.getElementById('new-request-priority').value=req.priority;
-      document.getElementById('new-request-status').value=req.status;
-      modal.style.display='flex';
-    }
-
-    async function deleteRequest(id){
-      if(!confirm("Are you sure?")) return;
-      const user_id=document.getElementById('current-user').value;
-      await supabase.from('automation_requests').delete().eq('id',id);
-      await supabase.from('audit_logs').insert([{action:'Deleted Request',entity:'automation_requests',details:{id},user_id}]);
-      loadRequests();
-    }
-
-    document.getElementById('save-new-request').onclick=async ()=>{
-      const title=document.getElementById('new-request-title').value.trim();
-      const department_id=document.getElementById('new-request-department').value;
-      const priority=document.getElementById('new-request-priority').value;
-      const status=document.getElementById('new-request-status').value;
-      if(!title||!department_id) return alert("Title & Department required");
-      const user_id=document.getElementById('current-user').value;
-      if(currentEditId){
-        await supabase.from('automation_requests').update({title,department_id,priority,status}).eq('id',currentEditId);
-        await supabase.from('audit_logs').insert([{action:'Updated Request',entity:'automation_requests',details:{title,department_id,priority,status},user_id}]);
-      } else {
-        await supabase.from('automation_requests').insert([{title,department_id,priority,status,created_by:user_id}]);
-        await supabase.from('audit_logs').insert([{action:'Created Request',entity:'automation_requests',details:{title,department_id,priority,status},user_id}]);
+    // Load tables into dropdown
+    async function loadTables() {
+      dropdownList.innerHTML = '';
+      for (let table of tables) {
+        const li = document.createElement('li');
+        li.textContent = table;
+        li.className = "py-2 px-3 hover:bg-[#E32119] hover:text-white cursor-pointer";
+        li.addEventListener('click', () => loadTableData(table));
+        dropdownList.appendChild(li);
       }
-      modal.style.display='none';
-      loadRequests();
-    };
-
-    async function triggerIntegration(id){
-      const req=requestsData.find(r=>r.id===id);
-      const user_id=document.getElementById('current-user').value;
-      alert(`Integration triggered for "${req.title}" (simulate API call)`);
-      await supabase.from('audit_logs').insert([{action:'Integration Triggered',entity:'automation_requests',details:{title:req.title,id},user_id}]);
     }
 
-    // ============================ Audit Logs
-    async function loadAuditLogs(){
-      const {data,error}=await supabase.from('audit_logs').select(`action,entity,details,created_at,employees!left(name)`);
-      if(error) return console.error(error);
-      const tbody=document.querySelector('#auditlogs-table tbody'); tbody.innerHTML='';
-      data.forEach(l=>{
-        const tr=document.createElement('tr');
-        tr.innerHTML=`<td>${l.action}</td><td>${l.entity}</td><td>${JSON.stringify(l.details)}</td><td>${l.employees?l.employees.name:'N/A'}</td><td>${new Date(l.created_at).toLocaleString()}</td>`;
-        tbody.appendChild(tr);
-      });
+    // Load table data when clicked
+    async function loadTableData(tableName) {
+      dropdownList.classList.add('hidden');
+      dataDisplay.innerHTML = `<p class='text-[#9B9C9C]'>Loading ${tableName}...</p>`;
+      const { data, error } = await supabase.from(tableName).select('*').limit(10);
+      if (error) {
+        dataDisplay.innerHTML = `<p class='text-red-500'>Error loading ${tableName}: ${error.message}</p>`;
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        dataDisplay.innerHTML = `<p class='text-[#9B9C9C]'>No data found in ${tableName}.</p>`;
+        return;
+      }
+
+      // Create a simple table
+      let html = `<h2 class='text-xl font-semibold mb-3 capitalize'>${tableName.replace('_', ' ')}</h2>`;
+      html += "<table class='w-full border-collapse border border-gray-300 text-sm'>";
+      html += "<thead><tr>";
+      for (let key of Object.keys(data[0])) {
+        html += `<th class='border border-gray-300 px-2 py-1 bg-[#9B9C9C] text-white'>${key}</th>`;
+      }
+      html += "</tr></thead><tbody>";
+
+      for (let row of data) {
+        html += "<tr>";
+        for (let val of Object.values(row)) {
+          html += `<td class='border border-gray-300 px-2 py-1 text-center'>${val ?? ''}</td>`;
+        }
+        html += "</tr>";
+      }
+
+      html += "</tbody></table>";
+      dataDisplay.innerHTML = html;
     }
 
-    // ============================ Analytics
-    let deptChart, statusChart, priorityChart;
-    function renderCharts(){
-      const ctxDept=document.getElementById('requests-dept-chart').getContext('2d');
-      const ctxStatus=document.getElementById('requests-status-chart').getContext('2d');
-      const ctxPriority=document.getElementById('requests-priority-chart').getContext('2d');
-
-      const deptCounts={}, statusCounts={}, priorityCounts={};
-      requestsData.forEach(r=>{
-        deptCounts[r.departments.name]=(deptCounts[r.departments.name]||0)+1;
-        statusCounts[r.status]=(statusCounts[r.status]||0)+1;
-        priorityCounts[r.priority]=(priorityCounts[r.priority]||0)+1;
-      });
-
-      if(deptChart) deptChart.destroy();
-      if(statusChart) statusChart.destroy();
-      if(priorityChart) priorityChart.destroy();
-
-      deptChart=new Chart(ctxDept,{type:'bar',data:{labels:Object.keys(deptCounts),datasets:[{label:'# Requests per Dept',data:Object.values(deptCounts),backgroundColor:'#4B4B4D'}]},options:{responsive:true,plugins:{legend:{display:false}}}});
-      statusChart=new Chart(ctxStatus,{type:'pie',data:{labels:Object.keys(statusCounts),datasets:[{data:Object.values(statusCounts),backgroundColor:['#E32119','#FF9800','#4B4B4D']}]},options:{}});
-      priorityChart=new Chart(ctxPriority,{type:'doughnut',data:{labels:Object.keys(priorityCounts),datasets:[{data:Object.values(priorityCounts),backgroundColor:['#FF0000','#FFA500','#4B4B4D']}]},options:{}});
-    }
-
-    function refreshDashboard(){ renderRequests(); renderCharts(); }
-
-    // ============================ Filters
-    document.getElementById('status-filter').addEventListener('change', refreshDashboard);
-    document.getElementById('request-search').addEventListener('input', refreshDashboard);
-
-    // ============================ Load all
-    loadEmployees(); loadRequests(); loadAuditLogs();
+    document.addEventListener('DOMContentLoaded', loadTables);
   </script>
 </body>
 </html>
