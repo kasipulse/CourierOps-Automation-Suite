@@ -48,65 +48,36 @@
   </main>
 
   <script>
+    // Supabase setup (ready for future pages)
     const supabaseUrl = 'https://mwtaveiqrinwdpjrjacz.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13dGF2ZWlxcmlud2RwanJqYWN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MTkwNzYsImV4cCI6MjA3NTM5NTA3Nn0.2WU8_ukDX41eigfkcV7jwuVj1BSi-1FmFZIfyGiimdI';
     const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    const tables = ['employees', 'departments', 'roles', 'audit_logs'];
+    // Tables with URLs
+    const tables = [
+      { name: 'Employees', url: 'employees.html' },
+      { name: 'Departments', url: 'departments.html' },
+      { name: 'Roles', url: 'roles.html' },
+      { name: 'Audit Logs', url: 'auditlogs.html' }
+    ];
+
     const dropdownBtn = document.getElementById('dropdownBtn');
     const dropdownList = document.getElementById('tableDropdown');
-    const dataDisplay = document.getElementById('dataDisplay');
 
     // Toggle dropdown
     dropdownBtn.addEventListener('click', () => {
       dropdownList.classList.toggle('hidden');
     });
 
-    // Populate dropdown with table names and make clickable
-    async function loadTables() {
+    // Populate dropdown with clickable links
+    function loadTables() {
       dropdownList.innerHTML = '';
-      for (let table of tables) {
+      tables.forEach(table => {
         const li = document.createElement('li');
-        li.textContent = table;
         li.className = "py-2 px-3 hover:bg-[#E32119] hover:text-white cursor-pointer";
-        li.addEventListener('click', () => loadTableData(table));
+        li.innerHTML = `<a href="${table.url}">${table.name}</a>`;
         dropdownList.appendChild(li);
-      }
-    }
-
-    // Load data from Supabase table
-    async function loadTableData(tableName) {
-      dropdownList.classList.add('hidden');
-      dataDisplay.innerHTML = `<p class='text-[#9B9C9C]'>Loading ${tableName}...</p>`;
-      const { data, error } = await supabase.from(tableName).select('*').limit(10);
-      if (error) {
-        dataDisplay.innerHTML = `<p class='text-red-500'>Error loading ${tableName}: ${error.message}</p>`;
-        return;
-      }
-
-      if (!data || data.length === 0) {
-        dataDisplay.innerHTML = `<p class='text-[#9B9C9C]'>No data found in ${tableName}.</p>`;
-        return;
-      }
-
-      let html = `<h2 class='text-xl font-semibold mb-3 capitalize'>${tableName}</h2>`;
-      html += "<table class='w-full border-collapse border border-gray-300 text-sm'>";
-      html += "<thead><tr>";
-      for (let key of Object.keys(data[0])) {
-        html += `<th class='border border-gray-300 px-2 py-1 bg-[#9B9C9C] text-white'>${key}</th>`;
-      }
-      html += "</tr></thead><tbody>";
-
-      for (let row of data) {
-        html += "<tr>";
-        for (let val of Object.values(row)) {
-          html += `<td class='border border-gray-300 px-2 py-1 text-center'>${val ?? ''}</td>`;
-        }
-        html += "</tr>";
-      }
-
-      html += "</tbody></table>";
-      dataDisplay.innerHTML = html;
+      });
     }
 
     document.addEventListener('DOMContentLoaded', loadTables);
