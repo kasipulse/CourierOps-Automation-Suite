@@ -4,18 +4,52 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CourierOps Automation Suite</title>
+
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+      aside {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+      nav {
+        display: none;
+      }
+      #menuToggle {
+        display: block;
+      }
+      .mobile-nav {
+        display: none;
+      }
+      .mobile-nav.active {
+        display: block;
+      }
+    }
+  </style>
 </head>
-<body class="bg-white text-[#4B4B4D] font-sans min-h-screen flex">
+<body class="bg-white text-[#4B4B4D] font-sans min-h-screen flex flex-col md:flex-row">
+
   <!-- Sidebar -->
-  <aside class="w-64 bg-[#4B4B4D] text-white flex flex-col">
-    <div class="text-center py-6 border-b border-[#9B9C9C]">
-      <h1 class="text-2xl font-bold text-[#E32119]">CourierOps</h1>
-      <p class="text-sm text-[#9B9C9C]">Automation Suite</p>
+  <aside class="w-full md:w-64 bg-[#4B4B4D] text-white flex flex-col">
+    <div class="flex justify-between items-center px-4 py-4 border-b border-[#9B9C9C]">
+      <div>
+        <h1 class="text-2xl font-bold text-[#E32119]">CourierOps</h1>
+        <p class="text-sm text-[#9B9C9C]">Automation Suite</p>
+      </div>
+      <button id="menuToggle" class="block md:hidden bg-[#E32119] px-3 py-2 rounded">☰</button>
     </div>
 
-    <nav class="flex-1 p-4">
+    <nav class="p-4 mobile-nav md:flex-1 md:block">
       <h2 class="text-xs uppercase tracking-wide text-[#9B9C9C] mb-2">Menu</h2>
       <ul>
         <li><a href="index.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Dashboard</a></li>
@@ -48,33 +82,43 @@
   </main>
 
   <script>
-    // Supabase setup (ready for future pages)
+    // ✅ Supabase initialization FIXED
+    const { createClient } = supabase;
     const supabaseUrl = 'https://mwtaveiqrinwdpjrjacz.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13dGF2ZWlxcmlud2RwanJqYWN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MTkwNzYsImV4cCI6MjA3NTM5NTA3Nn0.2WU8_ukDX41eigfkcV7jwuVj1BSi-1FmFZIfyGiimdI';
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    const supabaseKey =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13dGF2ZWlxcmlud2RwanJqYWN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MTkwNzYsImV4cCI6MjA3NTM5NTA3Nn0.2WU8_ukDX41eigfkcV7jwuVj1BSi-1FmFZIfyGiimdI';
+    const client = createClient(supabaseUrl, supabaseKey);
 
-    // Tables with URLs
+    // Dropdown table list
     const tables = [
       { name: 'Employees', url: 'employees.html' },
       { name: 'Departments', url: 'departments.html' },
       { name: 'Roles', url: 'roles.html' },
-      { name: 'Audit Logs', url: 'auditlogs.html' }
+      { name: 'Audit Logs', url: 'auditlogs.html' },
     ];
 
     const dropdownBtn = document.getElementById('dropdownBtn');
     const dropdownList = document.getElementById('tableDropdown');
+    const menuToggle = document.getElementById('menuToggle');
+    const mobileNav = document.querySelector('.mobile-nav');
 
-    // Toggle dropdown
+    // ✅ Toggle mobile nav
+    menuToggle?.addEventListener('click', () => {
+      mobileNav.classList.toggle('active');
+    });
+
+    // ✅ Toggle dropdown
     dropdownBtn.addEventListener('click', () => {
       dropdownList.classList.toggle('hidden');
     });
 
-    // Populate dropdown with clickable links
+    // ✅ Populate dropdown
     function loadTables() {
       dropdownList.innerHTML = '';
-      tables.forEach(table => {
+      tables.forEach((table) => {
         const li = document.createElement('li');
-        li.className = "py-2 px-3 hover:bg-[#E32119] hover:text-white cursor-pointer";
+        li.className =
+          'py-2 px-3 hover:bg-[#E32119] hover:text-white cursor-pointer';
         li.innerHTML = `<a href="${table.url}">${table.name}</a>`;
         dropdownList.appendChild(li);
       });
