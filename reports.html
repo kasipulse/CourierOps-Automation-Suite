@@ -3,107 +3,49 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reports - CourierOps Automation Suite</title>
+  <title>Reports | CourierOps</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-white text-[#4B4B4D] font-sans min-h-screen flex">
 
-  <!-- Sidebar -->
-  <aside class="w-64 bg-[#4B4B4D] text-white flex flex-col">
-    <div class="text-center py-6 border-b border-[#9B9C9C]">
-      <h1 class="text-2xl font-bold text-[#E32119]">CourierOps</h1>
-      <p class="text-sm text-[#9B9C9C]">Automation Suite</p>
-    </div>
+<body class="bg-[#F9F9F9] min-h-screen text-[#4B4B4D] font-sans">
+  <header class="bg-[#4B4B4D] text-white p-4 flex justify-between items-center">
+    <h1 class="text-xl font-bold text-[#E32119]">CourierOps</h1>
+    <a href="index.html" class="text-sm hover:underline">← Back to Dashboard</a>
+  </header>
 
-    <nav class="flex-1 p-4">
-      <h2 class="text-xs uppercase tracking-wide text-[#9B9C9C] mb-2">Menu</h2>
-      <ul>
-        <li><a href="index.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Dashboard</a></li>
-        <li><a href="reports.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Reports</a></li>
-        <li><a href="employees.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Employees</a></li>
-      </ul>
-    </nav>
+  <main class="p-6">
+    <h2 class="text-2xl font-bold mb-4">Reports</h2>
 
-    <footer class="p-4 border-t border-[#9B9C9C] text-center text-xs text-[#9B9C9C]">
-      Built by <span class="text-[#E32119] font-semibold">Mpho Mahlaba</span>
-    </footer>
-  </aside>
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div class="bg-white p-4 rounded shadow hover:shadow-md">
+        <h3 class="text-lg font-semibold mb-2">Daily Deliveries</h3>
+        <p class="text-sm text-gray-600">Summary of all deliveries made today.</p>
+        <button class="mt-3 bg-[#E32119] text-white px-4 py-2 rounded">View Report</button>
+      </div>
 
-  <!-- Main Content -->
-  <main class="flex-1 p-8 bg-[#F9F9F9]">
-    <h1 class="text-3xl font-bold mb-6 text-[#4B4B4D]">Automation Requests</h1>
+      <div class="bg-white p-4 rounded shadow hover:shadow-md">
+        <h3 class="text-lg font-semibold mb-2">Driver Performance</h3>
+        <p class="text-sm text-gray-600">Compare driver efficiency and delivery rates.</p>
+        <button class="mt-3 bg-[#E32119] text-white px-4 py-2 rounded">View Report</button>
+      </div>
 
-    <div class="mb-4 flex gap-4">
-      <input type="text" id="searchTitle" placeholder="Search by title" class="border rounded p-2 flex-1">
-      <select id="filterStatus" class="border rounded p-2">
-        <option value="">All Statuses</option>
-        <option value="Pending">Pending</option>
-        <option value="Approved">Approved</option>
-        <option value="In Progress">In Progress</option>
-      </select>
-    </div>
-
-    <div id="reportsTable" class="bg-white p-4 rounded shadow">
-      <p class="text-[#9B9C9C]">Loading reports...</p>
+      <div class="bg-white p-4 rounded shadow hover:shadow-md">
+        <h3 class="text-lg font-semibold mb-2">POD Compliance</h3>
+        <p class="text-sm text-gray-600">Track PODs submitted and pending.</p>
+        <button class="mt-3 bg-[#E32119] text-white px-4 py-2 rounded">View Report</button>
+      </div>
     </div>
   </main>
 
   <script>
+    const { createClient } = supabase;
     const supabaseUrl = 'https://mwtaveiqrinwdpjrjacz.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13dGF2ZWlxcmlud2RwanJqYWN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MTkwNzYsImV4cCI6MjA3NTM5NTA3Nn0.2WU8_ukDX41eigfkcV7jwuVj1BSi-1FmFZIfyGiimdI';
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    const client = createClient(supabaseUrl, supabaseKey);
 
-    let requestsData = [];
-
-    async function loadReports() {
-      const { data, error } = await supabase
-        .from('automation_requests')
-        .select('id, title, status, priority, created_by!inner(name), departments!inner(name)');
-      if (error) { console.error(error); return; }
-      requestsData = data;
-      renderReports();
-    }
-
-    function renderReports() {
-      const filtered = requestsData
-        .filter(r => !document.getElementById('filterStatus').value || r.status === document.getElementById('filterStatus').value)
-        .filter(r => r.title.toLowerCase().includes(document.getElementById('searchTitle').value.toLowerCase()));
-
-      const tableDiv = document.getElementById('reportsTable');
-      if (!filtered.length) {
-        tableDiv.innerHTML = '<p class="text-[#9B9C9C]">No requests found.</p>';
-        return;
-      }
-
-      let html = "<table class='w-full border-collapse border border-gray-300 text-sm'>";
-      html += "<thead><tr>";
-      html += "<th class='border border-gray-300 px-2 py-1 bg-[#9B9C9C] text-white'>Title</th>";
-      html += "<th class='border border-gray-300 px-2 py-1 bg-[#9B9C9C] text-white'>Created By</th>";
-      html += "<th class='border border-gray-300 px-2 py-1 bg-[#9B9C9C] text-white'>Department</th>";
-      html += "<th class='border border-gray-300 px-2 py-1 bg-[#9B9C9C] text-white'>Status</th>";
-      html += "<th class='border border-gray-300 px-2 py-1 bg-[#9B9C9C] text-white'>Priority</th>";
-      html += "</tr></thead><tbody>";
-
-      filtered.forEach(r => {
-        html += `<tr>`;
-        html += `<td class='border border-gray-300 px-2 py-1'>${r.title}</td>`;
-        html += `<td class='border border-gray-300 px-2 py-1'>${r.created_by.name}</td>`;
-        html += `<td class='border border-gray-300 px-2 py-1'>${r.departments.name}</td>`;
-        html += `<td class='border border-gray-300 px-2 py-1'>${r.status}</td>`;
-        html += `<td class='border border-gray-300 px-2 py-1'>${r.priority}</td>`;
-        html += `</tr>`;
-      });
-
-      html += "</tbody></table>";
-      tableDiv.innerHTML = html;
-    }
-
-    document.getElementById('searchTitle').addEventListener('input', renderReports);
-    document.getElementById('filterStatus').addEventListener('change', renderReports);
-
-    loadReports();
+    // Later we’ll load actual report summaries here
+    console.log('Reports page ready.');
   </script>
-
 </body>
 </html>
