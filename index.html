@@ -13,12 +13,27 @@
   <style>
     /* Mobile responsiveness */
     @media (max-width: 768px) {
-      body { flex-direction: column; }
-      aside { width: 100%; flex-direction: row; justify-content: space-between; align-items: center; }
-      nav { display: none; }
-      #menuToggle { display: block; }
-      .mobile-nav { display: none; }
-      .mobile-nav.active { display: block; }
+      body {
+        flex-direction: column;
+      }
+      aside {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+      nav {
+        display: none;
+      }
+      #menuToggle {
+        display: block;
+      }
+      .mobile-nav {
+        display: none;
+      }
+      .mobile-nav.active {
+        display: block;
+      }
     }
   </style>
 </head>
@@ -37,21 +52,37 @@
     <nav class="p-4 mobile-nav md:flex-1 md:block">
       <h2 class="text-xs uppercase tracking-wide text-[#9B9C9C] mb-2">Menu</h2>
       <ul>
-        <li><a href="#" onclick="loadPage('dashboard.html'); return false;" class="block py-2 px-3 hover:bg-[#E32119] rounded">Dashboard</a></li>
-        <li><a href="#" onclick="loadPage('reports.html'); return false;" class="block py-2 px-3 hover:bg-[#E32119] rounded">Reports</a></li>
-        <li><a href="#" onclick="loadPage('employees.html'); return false;" class="block py-2 px-3 hover:bg-[#E32119] rounded">Employees</a></li>
-        <li><a href="#" onclick="loadPage('shopify-orders.html'); return false;" class="block py-2 px-3 hover:bg-[#E32119] rounded">Shopify Orders</a></li>
+        <li>
+          <a href="#" onclick="showDashboard(); return false;" class="block py-2 px-3 hover:bg-[#E32119] rounded">
+            Dashboard
+          </a>
+        </li>
+        <li>
+          <a href="#" onclick="loadEmployees(); return false;" class="block py-2 px-3 hover:bg-[#E32119] rounded">
+            Employees
+          </a>
+        </li>
+        <li>
+          <a href="#" onclick="loadDepartments(); return false;" class="block py-2 px-3 hover:bg-[#E32119] rounded">
+            Departments
+          </a>
+        </li>
+        <li>
+          <a href="#" onclick="loadRoles(); return false;" class="block py-2 px-3 hover:bg-[#E32119] rounded">
+            Roles
+          </a>
+        </li>
+        <li>
+          <a href="#" onclick="loadAuditLogs(); return false;" class="block py-2 px-3 hover:bg-[#E32119] rounded">
+            Audit Logs
+          </a>
+        </li>
+        <li>
+          <a href="#" onclick="loadShopifyOrders(); return false;" class="block py-2 px-3 hover:bg-[#E32119] rounded">
+            Shopify Orders
+          </a>
+        </li>
       </ul>
-
-      <div class="mt-6">
-        <h2 class="text-xs uppercase tracking-wide text-[#9B9C9C] mb-2">Database Tables</h2>
-        <div class="relative">
-          <button id="dropdownBtn" class="w-full bg-[#E32119] text-white py-2 px-3 rounded hover:bg-[#c01b13]">
-            Show Tables ▼
-          </button>
-          <ul id="tableDropdown" class="absolute w-full mt-2 bg-white text-[#4B4B4D] rounded shadow-lg hidden z-10"></ul>
-        </div>
-      </div>
     </nav>
 
     <footer class="p-4 border-t border-[#9B9C9C] text-center text-xs text-[#9B9C9C]">
@@ -61,30 +92,19 @@
 
   <!-- Main Content -->
   <main class="flex-1 p-8 bg-[#F9F9F9]">
-    <h1 class="text-3xl font-bold mb-6 text-[#4B4B4D]">Dashboard</h1>
+    <h1 class="text-3xl font-bold mb-6 text-[#4B4B4D]" id="mainTitle">Dashboard</h1>
     <div id="dataDisplay" class="bg-white p-4 rounded shadow">
-      <p class="text-[#9B9C9C]">Select a table from the sidebar to view data.</p>
+      <p class="text-[#9B9C9C]">Welcome! Select a menu option to view data.</p>
     </div>
   </main>
 
   <script>
-    // ✅ Supabase initialization
+    // Supabase setup
     const { createClient } = supabase;
     const supabaseUrl = 'https://mwtaveiqrinwdpjrjacz.supabase.co';
-    const supabaseKey =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13dGF2ZWlxcmlud2RwanJqYWN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MTkwNzYsImV4cCI6MjA3NTM5NTA3Nn0.2WU8_ukDX41eigfkcV7jwuVj1BSi-1FmFZIfyGiimdI';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13dGF2ZWlxcmlud2RwanJqYWN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MTkwNzYsImV4cCI6MjA3NTM5NTA3Nn0.2WU8_ukDX41eigfkcV7jwuVj1BSi-1FmFZIfyGiimdI';
     const client = createClient(supabaseUrl, supabaseKey);
 
-    // Sidebar + dropdown
-    const tables = [
-      { name: 'Employees', url: 'employees.html' },
-      { name: 'Departments', url: 'departments.html' },
-      { name: 'Roles', url: 'roles.html' },
-      { name: 'Audit Logs', url: 'auditlogs.html' },
-    ];
-
-    const dropdownBtn = document.getElementById('dropdownBtn');
-    const dropdownList = document.getElementById('tableDropdown');
     const menuToggle = document.getElementById('menuToggle');
     const mobileNav = document.querySelector('.mobile-nav');
 
@@ -93,50 +113,196 @@
       mobileNav.classList.toggle('active');
     });
 
-    // Toggle dropdown
-    dropdownBtn.addEventListener('click', () => {
-      dropdownList.classList.toggle('hidden');
-    });
+    const dataDisplay = document.getElementById('dataDisplay');
+    const mainTitle = document.getElementById('mainTitle');
 
-    // Populate dropdown
-    function loadTables() {
-      dropdownList.innerHTML = '';
-      tables.forEach((table) => {
-        const li = document.createElement('li');
-        li.className =
-          'py-2 px-3 hover:bg-[#E32119] hover:text-white cursor-pointer';
-        li.innerHTML = `<a href="#" onclick="loadPage('${table.url}'); return false;">${table.name}</a>`;
-        dropdownList.appendChild(li);
-      });
+    // Helper: display empty dash if null
+    function dash(value) {
+      return value === null || value === undefined || value === "" ? '-' : value;
     }
-    document.addEventListener('DOMContentLoaded', loadTables);
 
-    // ✅ Dynamic page loader
-    async function loadPage(url) {
-      const dataDisplay = document.getElementById('dataDisplay');
-      try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('Page not found');
-        const html = await res.text();
-        dataDisplay.innerHTML = html;
+    // Dashboard placeholder
+    function showDashboard() {
+      mainTitle.innerText = 'Dashboard';
+      dataDisplay.innerHTML = '<p class="text-gray-500">Welcome! Select a menu option to view data.</p>';
+    }
 
-        // Execute any scripts in the page
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = html;
-        const scripts = tempDiv.querySelectorAll('script');
-        scripts.forEach((script) => {
-          const newScript = document.createElement('script');
-          if (script.src) newScript.src = script.src;
-          else newScript.innerHTML = script.innerHTML;
-          document.body.appendChild(newScript);
-        });
-      } catch (err) {
-        dataDisplay.innerHTML = `<p class="text-red-500">Error loading page: ${err.message}</p>`;
+    // Employees
+    async function loadEmployees() {
+      mainTitle.innerText = 'Employees';
+      dataDisplay.innerHTML = '<p class="text-gray-500">Loading employees...</p>';
+      const { data: employees, error } = await client.from('employees').select('*');
+
+      if (error) {
+        dataDisplay.innerHTML = `<p class="text-red-500">Error: ${error.message}</p>`;
+        return;
       }
+
+      let html = `<table class="min-w-full border border-gray-200">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="px-4 py-2 border">ID</th>
+            <th class="px-4 py-2 border">Name</th>
+            <th class="px-4 py-2 border">Department</th>
+            <th class="px-4 py-2 border">Role</th>
+            <th class="px-4 py-2 border">Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${employees.map(e => `
+            <tr>
+              <td class="px-4 py-2 border">${dash(e.id)}</td>
+              <td class="px-4 py-2 border">${dash(e.name)}</td>
+              <td class="px-4 py-2 border">${dash(e.department)}</td>
+              <td class="px-4 py-2 border">${dash(e.role)}</td>
+              <td class="px-4 py-2 border">${dash(e.email)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>`;
+
+      dataDisplay.innerHTML = html;
     }
 
-    // Load dashboard.html by default on page load
-    loadPage('dashboard.html');
+    // Departments
+    async function loadDepartments() {
+      mainTitle.innerText = 'Departments';
+      dataDisplay.innerHTML = '<p class="text-gray-500">Loading departments...</p>';
+      const { data, error } = await client.from('departments').select('*');
+
+      if (error) {
+        dataDisplay.innerHTML = `<p class="text-red-500">Error: ${error.message}</p>`;
+        return;
+      }
+
+      let html = `<table class="min-w-full border border-gray-200">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="px-4 py-2 border">ID</th>
+            <th class="px-4 py-2 border">Department Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.map(d => `
+            <tr>
+              <td class="px-4 py-2 border">${dash(d.id)}</td>
+              <td class="px-4 py-2 border">${dash(d.name)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>`;
+
+      dataDisplay.innerHTML = html;
+    }
+
+    // Roles
+    async function loadRoles() {
+      mainTitle.innerText = 'Roles';
+      dataDisplay.innerHTML = '<p class="text-gray-500">Loading roles...</p>';
+      const { data, error } = await client.from('roles').select('*');
+
+      if (error) {
+        dataDisplay.innerHTML = `<p class="text-red-500">Error: ${error.message}</p>`;
+        return;
+      }
+
+      let html = `<table class="min-w-full border border-gray-200">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="px-4 py-2 border">ID</th>
+            <th class="px-4 py-2 border">Role Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.map(r => `
+            <tr>
+              <td class="px-4 py-2 border">${dash(r.id)}</td>
+              <td class="px-4 py-2 border">${dash(r.name)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>`;
+
+      dataDisplay.innerHTML = html;
+    }
+
+    // Audit Logs
+    async function loadAuditLogs() {
+      mainTitle.innerText = 'Audit Logs';
+      dataDisplay.innerHTML = '<p class="text-gray-500">Loading audit logs...</p>';
+      const { data, error } = await client.from('audit_logs').select('*').order('created_at', { ascending: false });
+
+      if (error) {
+        dataDisplay.innerHTML = `<p class="text-red-500">Error: ${error.message}</p>`;
+        return;
+      }
+
+      let html = `<table class="min-w-full border border-gray-200">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="px-4 py-2 border">ID</th>
+            <th class="px-4 py-2 border">Action</th>
+            <th class="px-4 py-2 border">User</th>
+            <th class="px-4 py-2 border">Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.map(a => `
+            <tr>
+              <td class="px-4 py-2 border">${dash(a.id)}</td>
+              <td class="px-4 py-2 border">${dash(a.action)}</td>
+              <td class="px-4 py-2 border">${dash(a.user)}</td>
+              <td class="px-4 py-2 border">${dash(a.created_at)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>`;
+
+      dataDisplay.innerHTML = html;
+    }
+
+    // Shopify Orders
+    async function loadShopifyOrders() {
+      mainTitle.innerText = 'Shopify Orders';
+      dataDisplay.innerHTML = '<p class="text-gray-500">Loading Shopify orders...</p>';
+      const { data, error } = await client.from('shopify_orders').select('*').order('created_at', { ascending: false });
+
+      if (error) {
+        dataDisplay.innerHTML = `<p class="text-red-500">Error: ${error.message}</p>`;
+        return;
+      }
+
+      let html = `<table class="min-w-full border border-gray-200">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="px-4 py-2 border">Order ID</th>
+            <th class="px-4 py-2 border">Email</th>
+            <th class="px-4 py-2 border">Total</th>
+            <th class="px-4 py-2 border">Currency</th>
+            <th class="px-4 py-2 border">Created At</th>
+            <th class="px-4 py-2 border">Line Items</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.map(o => `
+            <tr>
+              <td class="px-4 py-2 border">${dash(o.order_id)}</td>
+              <td class="px-4 py-2 border">${dash(o.email)}</td>
+              <td class="px-4 py-2 border">${dash(o.total_price)}</td>
+              <td class="px-4 py-2 border">${dash(o.currency)}</td>
+              <td class="px-4 py-2 border">${dash(o.created_at)}</td>
+              <td class="px-4 py-2 border">${dash(o.line_items)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>`;
+
+      dataDisplay.innerHTML = html;
+    }
+
+    // Load dashboard by default
+    showDashboard();
+
   </script>
 </body>
 </html>
