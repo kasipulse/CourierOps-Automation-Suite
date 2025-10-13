@@ -13,27 +13,12 @@
   <style>
     /* Mobile responsiveness */
     @media (max-width: 768px) {
-      body {
-        flex-direction: column;
-      }
-      aside {
-        width: 100%;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-      }
-      nav {
-        display: none;
-      }
-      #menuToggle {
-        display: block;
-      }
-      .mobile-nav {
-        display: none;
-      }
-      .mobile-nav.active {
-        display: block;
-      }
+      body { flex-direction: column; }
+      aside { width: 100%; flex-direction: row; justify-content: space-between; align-items: center; }
+      nav { display: none; }
+      #menuToggle { display: block; }
+      .mobile-nav { display: none; }
+      .mobile-nav.active { display: block; }
     }
   </style>
 </head>
@@ -52,9 +37,10 @@
     <nav class="p-4 mobile-nav md:flex-1 md:block">
       <h2 class="text-xs uppercase tracking-wide text-[#9B9C9C] mb-2">Menu</h2>
       <ul>
-        <li><a href="index.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Dashboard</a></li>
-        <li><a href="reports.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Reports</a></li>
-        <li><a href="employees.html" class="block py-2 px-3 hover:bg-[#E32119] rounded">Employees</a></li>
+        <li><a href="#" onclick="loadPage('dashboard.html'); return false;" class="block py-2 px-3 hover:bg-[#E32119] rounded">Dashboard</a></li>
+        <li><a href="#" onclick="loadPage('reports.html'); return false;" class="block py-2 px-3 hover:bg-[#E32119] rounded">Reports</a></li>
+        <li><a href="#" onclick="loadPage('employees.html'); return false;" class="block py-2 px-3 hover:bg-[#E32119] rounded">Employees</a></li>
+        <li><a href="#" onclick="loadPage('shopify-orders.html'); return false;" class="block py-2 px-3 hover:bg-[#E32119] rounded">Shopify Orders</a></li>
       </ul>
 
       <div class="mt-6">
@@ -82,14 +68,14 @@
   </main>
 
   <script>
-    // ✅ Supabase initialization FIXED
+    // ✅ Supabase initialization
     const { createClient } = supabase;
     const supabaseUrl = 'https://mwtaveiqrinwdpjrjacz.supabase.co';
     const supabaseKey =
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im13dGF2ZWlxcmlud2RwanJqYWN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4MTkwNzYsImV4cCI6MjA3NTM5NTA3Nn0.2WU8_ukDX41eigfkcV7jwuVj1BSi-1FmFZIfyGiimdI';
     const client = createClient(supabaseUrl, supabaseKey);
 
-    // Dropdown table list
+    // Sidebar + dropdown
     const tables = [
       { name: 'Employees', url: 'employees.html' },
       { name: 'Departments', url: 'departments.html' },
@@ -102,29 +88,55 @@
     const menuToggle = document.getElementById('menuToggle');
     const mobileNav = document.querySelector('.mobile-nav');
 
-    // ✅ Toggle mobile nav
+    // Toggle mobile nav
     menuToggle?.addEventListener('click', () => {
       mobileNav.classList.toggle('active');
     });
 
-    // ✅ Toggle dropdown
+    // Toggle dropdown
     dropdownBtn.addEventListener('click', () => {
       dropdownList.classList.toggle('hidden');
     });
 
-    // ✅ Populate dropdown
+    // Populate dropdown
     function loadTables() {
       dropdownList.innerHTML = '';
       tables.forEach((table) => {
         const li = document.createElement('li');
         li.className =
           'py-2 px-3 hover:bg-[#E32119] hover:text-white cursor-pointer';
-        li.innerHTML = `<a href="${table.url}">${table.name}</a>`;
+        li.innerHTML = `<a href="#" onclick="loadPage('${table.url}'); return false;">${table.name}</a>`;
         dropdownList.appendChild(li);
       });
     }
-
     document.addEventListener('DOMContentLoaded', loadTables);
+
+    // ✅ Dynamic page loader
+    async function loadPage(url) {
+      const dataDisplay = document.getElementById('dataDisplay');
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Page not found');
+        const html = await res.text();
+        dataDisplay.innerHTML = html;
+
+        // Execute any scripts in the page
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        const scripts = tempDiv.querySelectorAll('script');
+        scripts.forEach((script) => {
+          const newScript = document.createElement('script');
+          if (script.src) newScript.src = script.src;
+          else newScript.innerHTML = script.innerHTML;
+          document.body.appendChild(newScript);
+        });
+      } catch (err) {
+        dataDisplay.innerHTML = `<p class="text-red-500">Error loading page: ${err.message}</p>`;
+      }
+    }
+
+    // Load dashboard.html by default on page load
+    loadPage('dashboard.html');
   </script>
 </body>
 </html>
