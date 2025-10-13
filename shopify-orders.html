@@ -1,1 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shopify Webhook Orders</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-[#F9F9F9] text-[#4B4B4D] p-8">
+  <h1 class="text-3xl font-bold mb-4">Shopify Webhook Orders</h1>
+  <p class="text-[#9B9C9C] mb-6">Incoming Shopify orders (auto-synced from webhook)</p>
 
+  <table class="min-w-full bg-white rounded shadow">
+    <thead>
+      <tr class="bg-[#E32119] text-white">
+        <th class="py-2 px-4 text-left">Order ID</th>
+        <th class="py-2 px-4 text-left">Email</th>
+        <th class="py-2 px-4 text-left">Total</th>
+        <th class="py-2 px-4 text-left">Created At</th>
+      </tr>
+    </thead>
+    <tbody id="orderTable" class="divide-y divide-gray-200"></tbody>
+  </table>
+
+  <script>
+    const supabaseUrl = "https://mwtaveiqrinwdpjrjacz.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    async function loadOrders() {
+      const { data, error } = await supabase
+        .from("shopify_orders")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      const table = document.getElementById("orderTable");
+      table.innerHTML = "";
+
+      if (error) {
+        table.innerHTML = `<tr><td colspan="4" class="text-center text-red-500 py-4">${error.message}</td></tr>`;
+        return;
+      }
+
+      data.forEach((o) => {
+        const row = `<tr>
+          <td class="py-2 px-4">${o.order_id}</td>
+          <td class="py-2 px-4">${o.email}</td>
+          <td class="py-2 px-4">${o.total_price} ${o.currency}</td>
+          <td class="py-2 px-4">${new Date(o.created_at).toLocaleString()}</td>
+        </tr>`;
+        table.innerHTML += row;
+      });
+    }
+
+    loadOrders();
+  </script>
+</body>
+</html>
